@@ -1,5 +1,6 @@
-from pathlib import Path
+from utils.input_manager import InputManager
 
-def count_bytes(file_path: Path) -> int:
-    return file_path.stat().st_size
+def count_bytes(file_path: str | None) -> int:
+    with InputManager(file_path, bin=True) as input:
+        return sum(len(line) for line in input)
 
