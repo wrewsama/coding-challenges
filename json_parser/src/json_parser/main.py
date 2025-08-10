@@ -3,13 +3,17 @@ import os
 import typer
 from rich import print
 
-from entities.exceptions import InvalidJsonException
-from use_cases.parse import parse
+from json_parser.entities.exceptions import InvalidJsonException
+from json_parser.use_cases.parse import parse
 
+app = typer.Typer()
+
+@app.command()
 def main(
-    filepath: Annotated[str, typer.Argument()] 
+    raw_filepath: Annotated[str, typer.Argument()] 
 ):
-    if not os.path.exists(filepath) or os.path.splitext(filepath) != 'json':
+    filepath = os.path.expandvars(raw_filepath)
+    if not os.path.exists(filepath) or os.path.splitext(filepath)[1] != '.json':
         raise typer.Exit(code=2)
 
     with open(filepath, "r") as f:
@@ -21,6 +25,7 @@ def main(
         raise typer.Exit(code=1)
     else:
         print(res)
+
 
 if __name__ == "__main__":
     typer.run(main)
