@@ -17,11 +17,12 @@ def main(
         raise typer.Exit(code=2)
 
     with open(filepath, "r") as f:
-        s = "".join(line for line in f)
+        s = "".join(line for line in f).strip()
 
     try:
         res = parse(s)
-    except InvalidJsonException:
+    except InvalidJsonException as e:
+        print(f"ERROR: {e}")
         raise typer.Exit(code=1)
     else:
         print(res)

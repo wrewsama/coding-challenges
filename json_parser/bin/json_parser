@@ -1,3 +1,3 @@
 #!/bin/bash
 
-exec uv run json_parser $@
+exec uv run src/json_parser/main.py $@
