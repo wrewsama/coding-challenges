@@ -21,7 +21,11 @@ def test_nonexistent(runner):
     res = runner.invoke(app, ["nonexistent"]) 
     assert res.exit_code == 2
 
-
 def test_strstr(runner):
     res = runner.invoke(app, ["test/inputs/strstr.json"]) 
     assert res.exit_code == 0
+
+def test_strnumboolnull(runner):
+    res = runner.invoke(app, ["test/inputs/strnumboolnull.json"]) 
+    assert res.exit_code == 0
+
