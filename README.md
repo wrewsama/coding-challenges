@@ -1,5 +1,5 @@
 # coding-challenges
-practice
+Practice **NO AI ALLOWED**
 
-source: [Coding Challenges by John Crickett](https://codingchallenges.fyi/challenges/intro)
+Source: [Coding Challenges by John Crickett](https://codingchallenges.fyi/challenges/intro)
 
