@@ -3,9 +3,9 @@ from pathlib import Path
 
 class CompAlgo(ABC):
     @abstractmethod
-    def compress(self, file_path: Path, output_path: Path) -> Path:
+    def compress(self, file_path: Path, output_path: Path):
         ...
 
     @abstractmethod
-    def decompress(self, file_path: Path, output_path: Path) -> Path:
+    def decompress(self, file_path: Path, output_path: Path):
         ... 

@@ -44,10 +44,11 @@ class Huffman(CompAlgo):
         logger.info("prefix codes: %s", prefix_code)
         self._write_header(output_path, prefix_code)
         self._write_compressed_data(file_path, output_path, prefix_code)
-        return file_path
 
     def decompress(self, file_path: Path, output_path: Path):
-        raise NotImplementedError()
+        prefix_code, bytes_to_skip = self._read_header(file_path)
+        logger.info("prefix code: %s, bytes to skip: %s", prefix_code, bytes_to_skip)
+
 
     def _calculate_freq_map(self, file_path: Path) -> dict[str, int]:
         freqmap = {}
@@ -126,3 +127,11 @@ class Huffman(CompAlgo):
         for char in line:
             result.extend(prefix_code[char])
         return result
+    
+    def _read_header(self, file_path: Path) -> tuple[dict[str, str], int]:
+        """return prefix code and total header size"""
+        with open(file_path, "rb") as file:
+            header_len, *_ = struct.unpack(_HEADER_LENGTH_FORMAT, file.read(4) )
+            prefix_code_bytes = file.read(header_len)
+        prefix_code = json.loads(prefix_code_bytes.decode())
+        return prefix_code, 4+len(prefix_code_bytes)
