@@ -25,6 +25,6 @@ def main() -> None:
         compression_algorithm.decompress(args.filepath, output_path) 
         return
 
-    output_path = args.output_path or args.filepath.parent / f"{args.filepath}.compressed"
+    output_path = args.output_path or Path(f"{args.filepath}.compressed")
     compression_algorithm.compress(args.filepath, output_path)
 

@@ -2,10 +2,13 @@ from pathlib import Path
 from typing import Optional
 from heapq import heapify, heappop, heappush
 import logging
+import json
+import struct
 
 from compress.comp_algo.comp_algo import CompAlgo
 
 logger = logging.getLogger(__name__)
+_HEADER_LENGTH_FORMAT = ">I"
 
 class _Node:
     _counter = 0
@@ -39,6 +42,8 @@ class Huffman(CompAlgo):
         logger.info("huffman tree: %s", root_node)
         prefix_code = self._generate_prefix_code(root_node)
         logger.info("prefix codes: %s", prefix_code)
+        self._write_header(output_path, prefix_code)
+        self._write_compressed_data(file_path, output_path, prefix_code)
         return file_path
 
     def decompress(self, file_path: Path, output_path: Path):
@@ -93,3 +98,31 @@ class Huffman(CompAlgo):
         backtrack(root_node, [])
         return result
 
+    def _write_header(self, output_path: Path, prefix_code: dict[str, str]):
+        prefix_code_bytes = json.dumps(prefix_code).encode()
+        header_bytes = struct.pack(_HEADER_LENGTH_FORMAT, len(prefix_code_bytes)) + prefix_code_bytes
+        output_path.write_bytes(header_bytes)
+
+    def _write_compressed_data(self, file_path: Path, output_path: Path, prefix_code: dict[str, str]):
+        with open(file_path) as infile, open(output_path, "ab") as outfile:
+            buf: list[str] = []
+            for line in infile:
+                for bit in self._to_compressed_bitarray(line, prefix_code):
+                    buf.append(bit)
+                    if len(buf) == 8:
+                        byte = int("".join(buf), 2).to_bytes()
+                        outfile.write(byte)
+                        buf = []
+            remaining_bits = "".join(buf)
+            if not remaining_bits:
+                return
+
+            padded = f"{remaining_bits:0<8}"
+            byte = int(padded, 2).to_bytes()
+            outfile.write(byte)
+
+    def _to_compressed_bitarray(self, line: str, prefix_code: dict[str, str]) -> list[str]:
+        result: list[str] = []
+        for char in line:
+            result.extend(prefix_code[char])
+        return result
