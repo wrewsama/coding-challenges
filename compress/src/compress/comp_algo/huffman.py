@@ -44,10 +44,14 @@ class Huffman(CompAlgo):
         logger.info("prefix codes: %s", prefix_code)
         self._write_header(output_path, prefix_code)
         self._write_compressed_data(file_path, output_path, prefix_code)
+        logger.info("compressed to %s", output_path)
 
     def decompress(self, file_path: Path, output_path: Path):
         prefix_code, bytes_to_skip = self._read_header(file_path)
         logger.info("prefix code: %s, bytes to skip: %s", prefix_code, bytes_to_skip)
+        prefix_decoder = self._get_prefix_decoder(prefix_code)
+        self._write_decompressed_data(file_path, output_path, prefix_decoder, bytes_to_skip)
+        logger.info("decompressed to %s", output_path)
 
 
     def _calculate_freq_map(self, file_path: Path) -> dict[str, int]:
@@ -131,7 +135,28 @@ class Huffman(CompAlgo):
     def _read_header(self, file_path: Path) -> tuple[dict[str, str], int]:
         """return prefix code and total header size"""
         with open(file_path, "rb") as file:
-            header_len, *_ = struct.unpack(_HEADER_LENGTH_FORMAT, file.read(4) )
+            header_len, *_ = struct.unpack(_HEADER_LENGTH_FORMAT, file.read(4))
             prefix_code_bytes = file.read(header_len)
         prefix_code = json.loads(prefix_code_bytes.decode())
-        return prefix_code, 4+len(prefix_code_bytes)
+        return prefix_code, 4+header_len
+
+    def _get_prefix_decoder(self, prefix_code: dict[str, str]) -> dict[str, str]:
+        """flip the mapping, codes will be unique by virtue of the huffman algo"""
+        return {code: char for char, code in prefix_code.items()}
+
+    def _write_decompressed_data(
+        self, file_path: Path, output_path: Path, prefix_decoder: dict[str, str], bytes_to_skip: int
+    ):
+        with open(file_path, "rb") as infile, open(output_path, "w") as outfile:
+            infile.read(bytes_to_skip) # skip header
+            buf = ""
+            while True:
+                byte = infile.read(1)
+                if not byte:
+                    break
+                bitstring = f"{int.from_bytes(byte):08b}"
+                for bit in bitstring:
+                    buf += bit
+                    if buf in prefix_decoder:
+                        outfile.write(prefix_decoder[buf])
+                        buf = ""
