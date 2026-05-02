@@ -1,8 +1,10 @@
 import argparse
 from pathlib import Path
+import logging
 
 from compress.comp_algo.comp_algo_factory import CompAlgoFactory
 
+logging.basicConfig(level=logging.INFO)
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Compress files using Huffman Encoding")
