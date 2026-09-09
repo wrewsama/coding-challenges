@@ -1,0 +1,5 @@
+(executable
+ (public_name load_balancer)
+ (name main)
+ (libraries load_balancer dream)
+ (preprocess (pps lwt_ppx)))
