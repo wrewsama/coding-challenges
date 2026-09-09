@@ -1,0 +1,4 @@
+(library
+ (name load_balancer)
+ (libraries dream cohttp-lwt-unix)
+ (preprocess (pps lwt_ppx)))
